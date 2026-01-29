@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Startech-ML/StartechML.csproj" />
+  <Project Path="StartechMl.web/StartechMl.web.csproj" Id="7a9a0c8f-51c2-494a-a36a-eab426eb66b8" />
+</Solution>
