@@ -1,4 +1,4 @@
-using StartechML.Utils;
+using StartechML.Core.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 

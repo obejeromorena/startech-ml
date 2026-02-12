@@ -8,7 +8,7 @@ using StartechML.Models;
 using StartechML.Utils;
 
 
-namespace StartechML.Api
+namespace StartechML.Core.Api
 {
     // Cliente encargado de comunicarse con la API de Mercado Libre
     public class MercadoLibreClient

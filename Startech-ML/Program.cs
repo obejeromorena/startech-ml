@@ -1,7 +1,6 @@
-﻿using StartechML.Api;
-using StartechML.Models;
-using StartechML.Services;
-using StartechML.Utils;
+﻿using StartechML.Core.Api;
+using StartechML.Core.Services;
+using StartechML.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,43 +22,37 @@ namespace StartechML
 
             try
             {
-                Console.WriteLine("StartechML - Crear publicaciones en Mercado Libre\n");
-                //TOKEN OAUTH VÁLIDO
-                string accessToken = "APP_USR-2804901742283043-021120-14066706e6fcbd181096f4d0a9ba1085-1170413717";
+                var tokenService = new TokenService();
+                var accessToken = await tokenService.GetValidAccessTokenAsync();
 
-                Logger.Write("Token cargado correctamente", "Y", "Y", Logger.Mode.Info.ToString());
-                //INICIALIZAR CLIENTE Y SERVICIO
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    Logger.Write("No se pudo obtener un token válido.", "Y", "Y", "Error");
+                    Console.WriteLine("No hay token válido. Primero autenticarse desde la WEB.");
+                    return;
+                }
 
                 var mlClient = new MercadoLibreClient(accessToken);
                 var publicationService = new BulkPublicationService(mlClient);
-                //3️ CARGAR PUBLICACIONES DESDE JSON
-
-                Console.WriteLine("Cargando publicaciones desde archivo JSON...\n");
-                Logger.Write("Cargando publicaciones desde JSON", "Y", "Y", Logger.Mode.Info.ToString());
 
                 var basePath = AppContext.BaseDirectory;
                 var jsonPath = Path.Combine(basePath, "data", "Publication.json");
 
-                List<PublicationRequest> publications = 
-                    FilePublicationLoader.LoadFromJson(jsonPath);
-
-                Logger.Write($"Se cargaron {publications.Count} publicaciones", "Y", "Y", Logger.Mode.Info.ToString());
+                var publications = FilePublicationLoader.LoadFromJson(jsonPath);
 
                 if (publications.Count == 0)
                 {
-                    Console.WriteLine("⚠️ No hay publicaciones para procesar.");
-                    Logger.Write("No hay publicaciones para procesar", "Y", "Y", Logger.Mode.Info.ToString());
+                    Logger.Write("No hay publicaciones para procesar.", "Y", "Y", "Info");
                     return;
                 }
 
-                //Ejecutar Publicacion masiva
                 await publicationService.PublishAllAsync(publications);
 
-                Logger.Write("Proceso finalizado correctamente", "Y", "Y", Logger.Mode.Info.ToString());
+                Logger.Write("Proceso finalizado correctamente.", "Y", "Y", "Info");
             }
             catch (Exception ex)
             {
-                Logger.Write("Error general: " + ex.Message, "Y", "Y", Logger.Mode.Error.ToString());
+                Logger.Write("Error general en consola: " + ex.Message, "Y", "Y", "Error");
             }
 
             Console.WriteLine("\nProceso finalizado");

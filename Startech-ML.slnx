@@ -1,4 +1,6 @@
 <Solution>
+  <Folder Name="/Elementos de la solución/" />
   <Project Path="Startech-ML/StartechML.csproj" />
+  <Project Path="StartechML.Core/StartechML.Core.csproj" Id="bc2a2a88-6fef-4d1c-a432-97381590a71a" />
   <Project Path="StartechMl.web/StartechMl.web.csproj" Id="7a9a0c8f-51c2-494a-a36a-eab426eb66b8" />
 </Solution>
