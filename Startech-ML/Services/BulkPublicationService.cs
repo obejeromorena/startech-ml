@@ -1,7 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using StartechML.Api;
+﻿using StartechML.Api;
 using StartechML.Models;
+using StartechML.Utils;
+using System;
+using System.Threading.Tasks;
 
 namespace StartechML.Services
 {
@@ -17,6 +18,8 @@ namespace StartechML.Services
 
         public async Task<string> PublishAsync(PublicationRequest publication)
         {
+            Logger.Write($"Validando publicación: {publication.Title}", "Y", "Y", Logger.Mode.Info.ToString());
+
             // Validaciones básicas antes de llamar a la API
             if (string.IsNullOrWhiteSpace(publication.Title))
                 throw new ArgumentException("El título es obligatorio");
@@ -30,6 +33,8 @@ namespace StartechML.Services
             if (publication.AvailableQuantity <= 0)
                 throw new ArgumentException("La cantidad debe ser mayor a 0");
 
+            Logger.Write($"Enviando publicación a MercadoLibre: {publication.Title}", "Y", "Y", Logger.Mode.Info.ToString());
+
             // Si todo está bien, delega la creación al cliente de ML
             return await _mlClient.CreatePublicationAsync(publication);
         }
@@ -40,17 +45,20 @@ namespace StartechML.Services
             {
                 try
                 {
+                    Logger.Write($"Publicando: {publication.Title}", "Y", "Y", Logger.Mode.Info.ToString());
                     Console.WriteLine($"Publicando: {publication.Title}");
 
                     var result = await PublishAsync(publication);
 
                     Console.WriteLine("✔ Publicación creada con éxito");
                     Console.WriteLine(result);
+                    Logger.Write($"Publicación creada correctamente: {publication.Title}", "Y", "Y", Logger.Mode.Info.ToString());
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("❌ Error al publicar");
                     Console.WriteLine(ex.Message);
+                    Logger.Write($"Error al publicar {publication.Title}: {ex.Message}", "Y", "Y", Logger.Mode.Error.ToString());
                 }
 
                 Console.WriteLine("----------------------------------");
