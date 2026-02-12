@@ -1,0 +1,40 @@
+[
+  {
+    "title": "Producto JSON 1 - StartechML",
+    "category_id": "MLA3530",
+    "price": 12000,
+    "available_quantity": 1,
+    "attributes": [
+      {
+        "id": "BRAND",
+        "value_name": "Marca JSON"
+      },
+      {
+        "id": "MODEL",
+        "value_name": "Modelo JSON 1"
+      }
+    ],
+    "pictures": [
+      { "source": "https://http2.mlstatic.com/D_NQ_NP_2X_123456-MLA00000000000_000000-F.webp" }
+    ]
+  },
+  {
+    "title": "Producto JSON 2 - StartechML",
+    "category_id": "MLA3530",
+    "price": 18000,
+    "available_quantity": 2,
+    "attributes": [
+      {
+        "id": "BRAND",
+        "value_name": "Marca JSON"
+      },
+      {
+        "id": "MODEL",
+        "value_name": "Modelo JSON 2"
+      }
+    ],
+    "pictures": [
+      { "source": "https://http2.mlstatic.com/D_NQ_NP_2X_123456-MLA00000000000_000000-F.webp" }
+    ]
+  }
+]

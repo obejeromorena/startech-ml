@@ -1,7 +1,11 @@
 ﻿using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using StartechML.Api;
+using StartechML.Models;
+using StartechML.Services;
+using System.Collections.Generic;
+using System.IO;
+
 
 namespace StartechML
 {
@@ -9,38 +13,60 @@ namespace StartechML
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("StartechML - Integración con Mercado Libre\n");
-
-         
-            string accessToken = "APP_USR-2804901742283043-012819-d30959df714bd365b2a0b831548ad02d-1170413717";
-
-            using var client = new HttpClient();
-
-            
-            client.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", accessToken);
+            Console.WriteLine("StartechML - Crear publicaciones en Mercado Libre\n");
 
 
-            var response = await client.GetAsync(
-                "https://api.mercadolibre.com/users/1170413717/items/search"
-            );
+            //TOKEN OAUTH VÁLIDO
+            string accessToken = "APP_USR-2804901742283043-021120-14066706e6fcbd181096f4d0a9ba1085-1170413717";
 
 
-            if (!response.IsSuccessStatusCode)
+            //INICIALIZAR CLIENTE Y SERVICIO
+
+            var mlClient = new MercadoLibreClient(accessToken);
+            var publicationService = new BulkPublicationService(mlClient);
+
+
+            //3️ CARGAR PUBLICACIONES DESDE JSON
+
+            Console.WriteLine("Cargando publicaciones desde archivo JSON...\n");
+
+            List<PublicationRequest> publications;
+
+            try
             {
-                Console.WriteLine($"Error: {response.StatusCode}");
-                Console.WriteLine(await response.Content.ReadAsStringAsync());
+                var basePath = AppContext.BaseDirectory;
+                var jsonPath = Path.Combine(basePath, "data", "Publication.json");
+
+                publications = FilePublicationLoader.LoadFromJson(jsonPath);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("❌ Error al cargar el archivo de publicaciones:");
+                Console.WriteLine(ex.Message);
                 return;
             }
 
-            
-            var json = await response.Content.ReadAsStringAsync();
+            if (publications.Count == 0)
+            {
+                Console.WriteLine("⚠️ No hay publicaciones para procesar.");
+                return;
+            }
+ 
+            //4️ EJECUTAR PUBLICACIÓN MASIVA
+            try
+            {
+                await publicationService.PublishAllAsync(publications);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("❌ Error general en el proceso:");
+                Console.WriteLine(ex.Message);
+            }
 
-            Console.WriteLine("Respuesta de Mercado Libre:");
-            Console.WriteLine(json);
-
-            Console.WriteLine("\nPresione una tecla para salir...");
+            Console.WriteLine("\nProceso finalizado");
             Console.ReadKey();
         }
     }
 }
+

@@ -1,16 +1,17 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
+using StartechML.Utils;
 
 namespace StartechML.web.Controllers
 {
     [ApiController]
     [Route("auth")]
-
     public class AuthController : ControllerBase
     {
         [HttpGet("login")]
         public IActionResult Login()
         {
+            Logger.Write("Ingreso a /auth/login", "Y", "Y", Logger.Mode.Info.ToString());
             var clientId = "2804901742283043";
 
             var redirectUri = Uri.EscapeDataString(

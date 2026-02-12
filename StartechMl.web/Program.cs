@@ -1,14 +1,27 @@
+using StartechML.Utils;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// INICIALIZAR LOGGER (ANTES DE Build)
+Logger.SetLogPath(Path.Combine(AppContext.BaseDirectory, "Log"));
+Logger.SetLogLine(85);
+Logger.Write("Inicio aplicación StartechML.WEB", "Y", "Y", Logger.Mode.Info.ToString());
 
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
 var app = builder.Build();
 
+// LOG DE AMBIENTE
 if (!app.Environment.IsDevelopment())
 {
+    Logger.Write("Ambiente PRODUCCIÓN", "Y", "Y", Logger.Mode.Info.ToString());
     app.UseExceptionHandler("/Error");
     app.UseHsts();
+}
+else
+{
+    Logger.Write("Ambiente DESARROLLO", "Y", "Y", Logger.Mode.Info.ToString());
 }
 
 app.UseHttpsRedirection();
@@ -19,4 +32,8 @@ app.MapStaticAssets();
 app.MapRazorPages().WithStaticAssets();
 app.MapControllers();
 
+// APP LEVANTADA
+Logger.Write("Aplicación StartechML.WEB levantada correctamente", "Y", "Y", Logger.Mode.Info.ToString());
+
 app.Run();
+
