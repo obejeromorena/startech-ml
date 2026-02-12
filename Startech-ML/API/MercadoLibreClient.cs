@@ -5,6 +5,8 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using StartechML.Models;
+using StartechML.Utils;
+
 
 namespace StartechML.Api
 {
@@ -17,6 +19,8 @@ namespace StartechML.Api
         // Constructor: recibe el access token
         public MercadoLibreClient(string accessToken)
         {
+            Logger.Write("Inicializando MercadoLibreClient", "Y", "Y", Logger.Mode.Info.ToString());
+
             // Handler HTTP (configuración avanzada)
             var handler = new HttpClientHandler
             {
@@ -34,16 +38,20 @@ namespace StartechML.Api
             _httpClient.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json")
             );
+            Logger.Write("MercadoLibreClient inicializado correctamente", "Y", "Y", Logger.Mode.Info.ToString());
         }
 
         // Crea una publicación en Mercado Libre
         public async Task<string> CreatePublicationAsync(PublicationRequest publication)
         {
+            Logger.Write($"Serializando publicación: {publication.Title}", "Y", "Y", Logger.Mode.Info.ToString());
             // Convierte el objeto PublicationRequest a JSON
             var json = JsonSerializer.Serialize(publication);
 
             // Crea el contenido HTTP con encoding UTF-8 y tipo application/json
             var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            Logger.Write("Enviando POST a https://api.mercadolibre.com/items", "Y", "Y", Logger.Mode.Info.ToString());
 
             // Hace el POST al endpoint oficial de creación de ítems
             var response = await _httpClient.PostAsync(
@@ -57,10 +65,23 @@ namespace StartechML.Api
             // Si la API devuelve error, se lanza una excepción
             if (!response.IsSuccessStatusCode)
             {
+                Logger.Write(
+                    $"Error API ML: {response.StatusCode} - {responseBody}",
+                    "Y",
+                    "Y",
+                    Logger.Mode.Error.ToString()
+                );
                 throw new HttpRequestException(
                     $"Error al crear publicación: {response.StatusCode} - {responseBody}"
                 );
             }
+
+            Logger.Write(
+                $"Publicación creada exitosamente: {publication.Title}",
+                "Y",
+                "Y",
+                Logger.Mode.Info.ToString()
+            );
 
             // Devuelve la respuesta de Mercado Libre (JSON)
             return responseBody;
