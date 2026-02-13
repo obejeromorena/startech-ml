@@ -29,6 +29,9 @@ namespace StartechML.Core.Services
             );
 
             var json = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("RESPUESTA COMPLETA DE ML:");
+            Console.WriteLine(json);
+
 
             if (!response.IsSuccessStatusCode)
             {

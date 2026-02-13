@@ -15,16 +15,16 @@ namespace StartechML.Core.Services
 
         public TokenService()
         {
-            // Esto apunta a:
-            // bin\Debug\net10.0\
-            var basePath = AppContext.BaseDirectory;
+            var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
-            // Subimos 3 niveles hasta la raíz del proyecto
-            var projectRoot = Directory.GetParent(basePath)!.Parent!.Parent!.FullName;
+            var folderPath = Path.Combine(appDataPath, "StartechML");
 
-            // Creamos ruta SharedData/token.json
-            _path = Path.Combine(projectRoot, "SharedData", "token.json");
+            if (!Directory.Exists(folderPath))
+                Directory.CreateDirectory(folderPath);
+
+            _path = Path.Combine(folderPath, "token.json");
         }
+
 
         public void SaveToken(TokenResponse token)
         {

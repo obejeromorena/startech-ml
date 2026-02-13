@@ -10,6 +10,15 @@ Logger.Write("Inicio aplicación StartechML.WEB", "Y", "Y", Logger.Mode.Info.ToSt
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+});
+
+
 var app = builder.Build();
 
 // LOG DE AMBIENTE
@@ -26,6 +35,8 @@ else
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+app.UseCors("AllowAll");
 app.UseAuthorization();
 
 app.MapStaticAssets();
