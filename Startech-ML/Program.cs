@@ -1,11 +1,12 @@
-﻿using StartechML.Core.Api;
-using StartechML.Core.Services;
+﻿using StartechML.Core.Models;
 using StartechML.Core.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
-
 
 namespace StartechML
 {
@@ -13,40 +14,52 @@ namespace StartechML
     {
         static async Task Main(string[] args)
         {
-            //1️ INICIALIZAR LOGGER
             Logger.SetLogPath(Path.Combine(AppContext.BaseDirectory, "Log"));
             Logger.SetLogLine(85);
-            Logger.Write("Inicio aplicación StartechML (Consola)", "Y", "Y", Logger.Mode.Info.ToString());
-
-
+            Logger.Write("Inicio aplicación StartechML (Consola)", "Y", "Y", "Info");
 
             try
             {
-                var tokenService = new TokenService();
-                var accessToken = await tokenService.GetValidAccessTokenAsync();
-
-                if (string.IsNullOrEmpty(accessToken))
-                {
-                    Logger.Write("No se pudo obtener un token válido.", "Y", "Y", "Error");
-                    Console.WriteLine("No hay token válido. Primero autenticarse desde la WEB.");
-                    return;
-                }
-
-                var mlClient = new MercadoLibreClient(accessToken);
-                var publicationService = new BulkPublicationService(mlClient);
-
                 var basePath = AppContext.BaseDirectory;
                 var jsonPath = Path.Combine(basePath, "data", "Publication.json");
 
-                var publications = FilePublicationLoader.LoadFromJson(jsonPath);
+                // 🔹 Leer archivo JSON
+                var json = await File.ReadAllTextAsync(jsonPath);
 
-                if (publications.Count == 0)
+                // 🔹 Convertir a lista de PublicationRequest
+                var publications = JsonSerializer.Deserialize<List<PublicationRequest>>(json);
+
+                if (publications == null || publications.Count == 0)
                 {
-                    Logger.Write("No hay publicaciones para procesar.", "Y", "Y", "Info");
+                    Logger.Write("No hay publicaciones para enviar.", "Y", "Y", "Info");
                     return;
                 }
 
-                await publicationService.PublishAllAsync(publications);
+                using var httpClient = new HttpClient();
+
+                foreach (var publication in publications)
+                {
+                    var content = new StringContent(
+                        JsonSerializer.Serialize(publication),
+                        Encoding.UTF8,
+                        "application/json"
+                    );
+
+                    // 🔹 Enviar al Web
+                    var response = await httpClient.PostAsync(
+                        "https://localhost:7006/api/publications",
+                        content
+                    );
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        Logger.Write("Publicación enviada al Web correctamente.", "Y", "Y", "Info");
+                    }
+                    else
+                    {
+                        Logger.Write("Error al enviar publicación al Web.", "Y", "Y", "Error");
+                    }
+                }
 
                 Logger.Write("Proceso finalizado correctamente.", "Y", "Y", "Info");
             }

@@ -10,16 +10,24 @@ Logger.Write("Inicio aplicación StartechML.WEB", "Y", "Y", Logger.Mode.Info.ToSt
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
+// Habilitamos CORS para permitir llamadas desde React
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        policy => policy.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader());
+    options.AddPolicy("ReactPolicy",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
 });
 
 
+
 var app = builder.Build();
+app.UseHttpsRedirection();
+app.UseCors("ReactPolicy");
+
 
 // LOG DE AMBIENTE
 if (!app.Environment.IsDevelopment())
@@ -33,10 +41,8 @@ else
     Logger.Write("Ambiente DESARROLLO", "Y", "Y", Logger.Mode.Info.ToString());
 }
 
-app.UseHttpsRedirection();
 app.UseRouting();
 
-app.UseCors("AllowAll");
 app.UseAuthorization();
 
 app.MapStaticAssets();
