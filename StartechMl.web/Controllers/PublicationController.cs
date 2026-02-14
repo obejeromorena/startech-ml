@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using StartechML.Core.Services;
+using Startech_ML.Web.Storage;
 using StartechML.Core.Api;
 using StartechML.Core.Models;
-using Startech_ML.Web.Storage;
-using System.Text.Json;
+using StartechML.Core.Services;
 
 namespace StartechML.web.Controllers
 {
@@ -14,7 +12,6 @@ namespace StartechML.web.Controllers
     {
         private readonly ILogger<PublicationController> _logger;
 
-        //  Inyectamos el logger profesionalmente
         public PublicationController(ILogger<PublicationController> logger)
         {
             _logger = logger;
@@ -30,7 +27,6 @@ namespace StartechML.web.Controllers
             {
                 _logger.LogInformation("Iniciando publicación en Mercado Libre...");
 
-                // 1️ Obtenemos token válido
                 var tokenService = new TokenService();
                 var accessToken = await tokenService.GetValidAccessTokenAsync();
 
@@ -40,25 +36,19 @@ namespace StartechML.web.Controllers
                     return Unauthorized("No hay token válido.");
                 }
 
-                // 2️ Creamos cliente de Mercado Libre
                 var mlClient = new MercadoLibreClient(accessToken);
-
-                // 3️ Creamos servicio de publicación
                 var service = new BulkPublicationService(mlClient);
 
-                // 4️ Publicamos el producto
                 var result = await service.PublishAsync(request);
 
                 _logger.LogInformation("Publicación realizada correctamente.");
 
-                // 5️ Guardamos la respuesta de la API en memoria
-                // Esto es lo que luego el frontend va a mostrar
-                var json = JsonSerializer.Serialize(result);
-                PublicationStorage.Publications.Add(json);
+                //  CAMBIO IMPORTANTE
+                // Guardamos el objeto directamente (NO string)
+                PublicationStorage.Publications.Add(result);
 
                 _logger.LogInformation("Publicación guardada en memoria.");
 
-                // 6️ Devolvemos al cliente la respuesta de Mercado Libre
                 return Ok(result);
             }
             catch (Exception ex)
@@ -75,7 +65,6 @@ namespace StartechML.web.Controllers
         public IActionResult GetAll()
         {
             _logger.LogInformation("Obteniendo publicaciones almacenadas.");
-
             return Ok(PublicationStorage.Publications);
         }
     }

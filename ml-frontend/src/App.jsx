@@ -10,20 +10,18 @@ function App() {
     }, []);
 
     const fetchPublications = async () => {
-        try {
+    try {
         const response = await fetch("https://localhost:7006/api/publications");
         const data = await response.json();
 
-        //  Recordá que guardamos strings JSON
-        // Entonces los convertimos a objeto
-        const parsed = data.map(p => JSON.parse(p));
-
-        setPublications(parsed);
-        } catch (error) {
+        // Ahora ya vienen como objetos
+        setPublications(data);
+    } catch (error) {
         console.error(error);
         alert("Error al obtener publicaciones");
-        }
-    };
+    }
+};
+
 
     return (
         <div style={{ padding: "30px" }}>
