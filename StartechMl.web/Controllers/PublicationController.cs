@@ -42,6 +42,7 @@ namespace StartechML.web.Controllers
                 var result = await service.PublishAsync(request);
 
                 _logger.LogInformation("Publicación realizada correctamente.");
+                _logger.LogInformation($"Tipo de result: {result.GetType()}");
 
                 //  CAMBIO IMPORTANTE
                 // Guardamos el objeto directamente (NO string)
