@@ -23,10 +23,10 @@ namespace StartechML
                 var basePath = AppContext.BaseDirectory;
                 var jsonPath = Path.Combine(basePath, "data", "Publication.json");
 
-                // 🔹 Leer archivo JSON
+                // Leer archivo JSON
                 var json = await File.ReadAllTextAsync(jsonPath);
 
-                // 🔹 Convertir a lista de PublicationRequest
+                // Convertir a lista de PublicationRequest
                 var publications = JsonSerializer.Deserialize<List<PublicationRequest>>(json);
 
                 if (publications == null || publications.Count == 0)
@@ -57,7 +57,13 @@ namespace StartechML
                     }
                     else
                     {
-                        Logger.Write("Error al enviar publicación al Web.", "Y", "Y", "Error");
+                        var errorContent = await response.Content.ReadAsStringAsync();
+
+                        Logger.Write($"Error al enviar publicación al Web. Status: {response.StatusCode}", "Y", "Y", "Error");
+                        Logger.Write($"Detalle: {errorContent}", "Y", "Y", "Error");
+
+                        Console.WriteLine("Error:");
+                        Console.WriteLine(errorContent);
                     }
                 }
 

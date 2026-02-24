@@ -65,8 +65,13 @@ namespace StartechML.Core.Services
                 new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true // Ignora mayúsculas/minúsculas
-                });
-
+                }
+            );
+            //Validamos que no sea null
+            if (publicationResponse == null)
+            {
+                throw new Exception("Error al deserializar la respuesta de Mercado Libre.");
+            }
             // Devolvemos el objeto real, NO un string
             return publicationResponse;
         }

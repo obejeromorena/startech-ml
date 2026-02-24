@@ -15,7 +15,9 @@
       }
     ],
     "pictures": [
-      { "source": "https://http2.mlstatic.com/D_NQ_NP_2X_123456-MLA00000000000_000000-F.webp" }
+      {
+        "source": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8"
+      }
     ]
   },
   {
@@ -34,7 +36,9 @@
       }
     ],
     "pictures": [
-      { "source": "https://http2.mlstatic.com/D_NQ_NP_2X_123456-MLA00000000000_000000-F.webp" }
+      {
+        "source": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7"
+      }
     ]
   }
 ]

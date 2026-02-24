@@ -44,8 +44,7 @@ namespace StartechML.web.Controllers
                 _logger.LogInformation("Publicación realizada correctamente.");
                 _logger.LogInformation($"Tipo de result: {result.GetType()}");
 
-                //  CAMBIO IMPORTANTE
-                // Guardamos el objeto directamente (NO string)
+                // Guardamos el objeto directamente (No string)
                 PublicationStorage.Publications.Add(result);
 
                 _logger.LogInformation("Publicación guardada en memoria.");
