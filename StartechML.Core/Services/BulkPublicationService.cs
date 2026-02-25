@@ -20,20 +20,14 @@ namespace StartechML.Core.Services
             _mlClient = mlClient;
         }
 
-        // ============================================================
         // PUBLICA UNA SOLA PUBLICACIÓN
-        // ============================================================
 
-        // CAMBIO IMPORTANTE:
-        // Antes devolvía Task<string>
         // Ahora devuelve Task<PublicationResponse>
         public async Task<PublicationResponse> PublishAsync(PublicationRequest publication)
         {
             Logger.Write($"Validando publicación: {publication.Title}", "Y", "Y", Logger.Mode.Info.ToString());
 
-            // ============================
             // VALIDACIONES BÁSICAS
-            // ============================
 
             if (string.IsNullOrWhiteSpace(publication.Title))
                 throw new ArgumentException("El título es obligatorio");
@@ -49,16 +43,13 @@ namespace StartechML.Core.Services
 
             Logger.Write($"Enviando publicación a MercadoLibre: {publication.Title}", "Y", "Y", Logger.Mode.Info.ToString());
 
-            // ============================================================
             // LLAMADA AL CLIENTE DE MERCADO LIBRE
-            // ============================================================
+    
 
             // El cliente devuelve un JSON en formato string
             var jsonResponse = await _mlClient.CreatePublicationAsync(publication);
 
-            // ============================================================
             //  DESERIALIZAMOS EL JSON A UN OBJETO REAL
-            // ============================================================
 
             var publicationResponse = JsonSerializer.Deserialize<PublicationResponse>(
                 jsonResponse,
@@ -76,9 +67,7 @@ namespace StartechML.Core.Services
             return publicationResponse;
         }
 
-        // ============================================================
         // PUBLICA MUCHAS PUBLICACIONES
-        // ============================================================
 
         public async Task PublishAllAsync(List<PublicationRequest> publications)
         {
