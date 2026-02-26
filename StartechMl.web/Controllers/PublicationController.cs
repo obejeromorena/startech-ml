@@ -3,20 +3,16 @@ using Startech_ML.Web.Storage;
 using StartechML.Core.Api;
 using StartechML.Core.Models;
 using StartechML.Core.Services;
+using System.Linq;
+using StartechML.Core.Utils;
+using System;
 
-namespace StartechML.web.Controllers
+namespace StartechML.Web.Controllers
 {
     [ApiController]
     [Route("api/publications")]
     public class PublicationController : ControllerBase
     {
-        private readonly ILogger<PublicationController> _logger;
-
-        public PublicationController(ILogger<PublicationController> logger)
-        {
-            _logger = logger;
-        }
-
         // =========================================
         // POST: Publica un producto en Mercado Libre
         // =========================================
@@ -25,48 +21,94 @@ namespace StartechML.web.Controllers
         {
             try
             {
-                _logger.LogInformation("Iniciando publicación en Mercado Libre...");
+                Logger.Write("Iniciando publicación en Mercado Libre...", "Y", "Y", Logger.Mode.Info.ToString());
 
+
+                // VALIDACIÓN PROFESIONAL DE IMÁGENES
+
+
+                // Validar que la lista no sea null
+                if (request.Pictures == null)
+                {
+                    Logger.Write("La lista de imágenes es null.", "Y", "Y", Logger.Mode.Info.ToString());
+                    return BadRequest("Debe enviar al menos una imagen.");
+                }
+
+                // Validar que tenga al menos 1 imagen
+                if (request.Pictures.Count == 0)
+                {
+                    Logger.Write("La publicación no contiene imágenes.", "Y", "Y", Logger.Mode.Info.ToString());
+                    return BadRequest("Debe incluir al menos una imagen.");
+                }
+
+                // Validar máximo permitido por Mercado Libre
+                if (request.Pictures.Count > 12)
+                {
+                    Logger.Write("La publicación supera el límite de 12 imágenes.", "Y", "Y", Logger.Mode.Info.ToString());
+                    return BadRequest("No se pueden enviar más de 12 imágenes.");
+                }
+
+                // Validar que ninguna imagen tenga URL vacía
+                if (request.Pictures.Any(p => string.IsNullOrWhiteSpace(p.Source)))
+                {
+                    Logger.Write("Una o más imágenes tienen URL vacía.", "Y", "Y", Logger.Mode.Info.ToString());
+
+                    return BadRequest("Todas las imágenes deben tener una URL válida.");
+                }
+
+                // FIN VALIDACIÓN
+
+                // Obtener token válido
                 var tokenService = new TokenService();
                 var accessToken = await tokenService.GetValidAccessTokenAsync();
 
                 if (string.IsNullOrEmpty(accessToken))
                 {
-                    _logger.LogWarning("No se encontró un token válido.");
+                    Logger.Write("No se encontró un token válido.", "Y", "Y", Logger.Mode.Info.ToString());
                     return Unauthorized("No hay token válido.");
                 }
 
+                // Crear cliente de Mercado Libre
                 var mlClient = new MercadoLibreClient(accessToken);
+
+                // Crear servicio de publicación
                 var service = new BulkPublicationService(mlClient);
 
+                // Publicar
                 var result = await service.PublishAsync(request);
 
-                _logger.LogInformation("Publicación realizada correctamente.");
-                _logger.LogInformation($"Tipo de result: {result.GetType()}");
+                Logger.Write("Publicación realizada correctamente.", "Y", "Y", Logger.Mode.Info.ToString());
 
-                // Guardamos el objeto directamente (No string)
+                // Guardar en memoria
                 PublicationStorage.Publications.Add(result);
 
-                _logger.LogInformation("Publicación guardada en memoria.");
+                Logger.Write("Publicación guardada en memoria.", "Y", "Y", Logger.Mode.Info.ToString());
 
                 return Ok(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al publicar en Mercado Libre.");
-                return BadRequest(ex.Message);
+                // Captura cualquier error inesperado
+                Logger.Write("Error al publicar en Mercado Libre: {ex.Message}", "Y", "Y", Logger.Mode.Info.ToString());
+                return BadRequest("Ocurrió un error al publicar.");
             }
         }
 
-        // =========================================
         // GET: Devuelve todas las publicaciones guardadas
-        // =========================================
+
         [HttpGet]
         public IActionResult GetAll()
         {
-            _logger.LogInformation("Obteniendo publicaciones almacenadas.");
-            return Ok(PublicationStorage.Publications);
+            try
+            {
+                Logger.Write("Obteniendo publicaciones almacenadas.", "Y", "Y", Logger.Mode.Info.ToString());
+                return Ok(PublicationStorage.Publications);
+            }
+            catch (Exception ex)
+            {
+                Logger.Write("Error al obtener publicaciones: {ex.Message}", "Y", "Y", Logger.Mode.Info.ToString());
+                return BadRequest("Error al obtener publicaciones.");
+            }
         }
     }
 }
-
