@@ -110,5 +110,71 @@ namespace StartechML.Web.Controllers
                 return BadRequest("Error al obtener publicaciones.");
             }
         }
+
+        // PUT: Modifica una publicación en ML
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(string id, [FromBody] object updateData)
+        {
+            try
+            {
+                Logger.Write($"Actualizando publicación {id}", "Y", "Y", Logger.Mode.Info.ToString());
+
+                var tokenService = new TokenService();
+                var accessToken = await tokenService.GetValidAccessTokenAsync();
+
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    Logger.Write("No se encontró token válido.", "Y", "Y", Logger.Mode.Info.ToString());
+                    return Unauthorized("No hay token válido.");
+                }
+
+                var mlClient = new MercadoLibreClient(accessToken);
+
+                var result = await mlClient.UpdatePublicationAsync(id, updateData);
+
+                Logger.Write($"Publicación {id} actualizada correctamente.", "Y", "Y", Logger.Mode.Info.ToString());
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Logger.Write($"Error al actualizar publicación: {ex.Message}", "Y", "Y", Logger.Mode.Error.ToString());
+                return BadRequest("Error al actualizar publicación.");
+            }
+        }
+
+        // DELETE: Cierra una publicación en ML
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            try
+            {
+                Logger.Write($"Cerrando publicación {id}", "Y", "Y", Logger.Mode.Info.ToString());
+
+                var tokenService = new TokenService();
+                var accessToken = await tokenService.GetValidAccessTokenAsync();
+
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    Logger.Write("No se encontró token válido.", "Y", "Y", Logger.Mode.Info.ToString());
+                    return Unauthorized("No hay token válido.");
+                }
+
+                var mlClient = new MercadoLibreClient(accessToken);
+
+                var result = await mlClient.ClosePublicationAsync(id);
+
+                Logger.Write($"Publicación {id} cerrada correctamente.", "Y", "Y", Logger.Mode.Info.ToString());
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Logger.Write($"Error al cerrar publicación: {ex.Message}", "Y", "Y", Logger.Mode.Error.ToString());
+                return BadRequest("Error al cerrar publicación.");
+            }
+        }
     }
 }

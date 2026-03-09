@@ -86,6 +86,111 @@ namespace StartechML.Core.Api
             // Devuelve la respuesta de Mercado Libre (JSON)
             return responseBody;
         }
+
+        // Obtiene las publicaciones del usuario en Mercado Libre
+        public async Task<string> GetPublicationsAsync(string userId)
+        {
+            Logger.Write($"Obteniendo publicaciones del usuario {userId}", "Y", "Y", Logger.Mode.Info.ToString());
+
+            var response = await _httpClient.GetAsync(
+                $"https://api.mercadolibre.com/users/{userId}/items/search"
+            );
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Logger.Write(
+                    $"Error al obtener publicaciones: {response.StatusCode} - {responseBody}",
+                    "Y",
+                    "Y",
+                    Logger.Mode.Error.ToString()
+                );
+
+                throw new HttpRequestException(
+                    $"Error al obtener publicaciones: {response.StatusCode} - {responseBody}"
+                );
+            }
+
+            Logger.Write("Publicaciones obtenidas correctamente", "Y", "Y", Logger.Mode.Info.ToString());
+
+            return responseBody;
+        }
+
+        // Modifica una publicación existente en Mercado Libre
+        public async Task<string> UpdatePublicationAsync(string itemId, object updateData)
+        {
+            Logger.Write($"Actualizando publicación {itemId}", "Y", "Y", Logger.Mode.Info.ToString());
+
+            var json = JsonSerializer.Serialize(updateData);
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PutAsync(
+                $"https://api.mercadolibre.com/items/{itemId}",
+                content
+            );
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Logger.Write(
+                    $"Error al actualizar publicación: {response.StatusCode} - {responseBody}",
+                    "Y",
+                    "Y",
+                    Logger.Mode.Error.ToString()
+                );
+
+                throw new HttpRequestException(
+                    $"Error al actualizar publicación: {response.StatusCode} - {responseBody}"
+                );
+            }
+
+            Logger.Write($"Publicación {itemId} actualizada correctamente", "Y", "Y", Logger.Mode.Info.ToString());
+
+            return responseBody;
+        }
+
+        // Cierra (elimina) una publicación en Mercado Libre
+        public async Task<string> ClosePublicationAsync(string itemId)
+        {
+            Logger.Write($"Cerrando publicación {itemId}", "Y", "Y", Logger.Mode.Info.ToString());
+
+            var body = new
+            {
+                status = "closed"
+            };
+
+            var json = JsonSerializer.Serialize(body);
+
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PutAsync(
+                $"https://api.mercadolibre.com/items/{itemId}",
+                content
+            );
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Logger.Write(
+                    $"Error al cerrar publicación: {response.StatusCode} - {responseBody}",
+                    "Y",
+                    "Y",
+                    Logger.Mode.Error.ToString()
+                );
+
+                throw new HttpRequestException(
+                    $"Error al cerrar publicación: {response.StatusCode} - {responseBody}"
+                );
+            }
+
+            Logger.Write($"Publicación {itemId} cerrada correctamente", "Y", "Y", Logger.Mode.Info.ToString());
+
+            return responseBody;
+        }
     }
 }
 
