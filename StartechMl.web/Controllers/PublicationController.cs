@@ -13,9 +13,9 @@ namespace StartechML.Web.Controllers
     [Route("api/publications")]
     public class PublicationController : ControllerBase
     {
-        // =========================================
+
         // POST: Publica un producto en Mercado Libre
-        // =========================================
+
         [HttpPost]
         public async Task<IActionResult> Publish([FromBody] PublicationRequest request)
         {
@@ -108,6 +108,39 @@ namespace StartechML.Web.Controllers
             {
                 Logger.Write("Error al obtener publicaciones: {ex.Message}", "Y", "Y", Logger.Mode.Info.ToString());
                 return BadRequest("Error al obtener publicaciones.");
+            }
+        }
+
+        // GET: Obtiene publicaciones reales desde Mercado Libre
+
+        [HttpGet("ml/{userId}")]
+        public async Task<IActionResult> GetFromML(string userId)
+        {
+            try
+            {
+                Logger.Write($"Consultando publicaciones en ML para usuario {userId}", "Y", "Y", Logger.Mode.Info.ToString());
+
+                var tokenService = new TokenService();
+                var accessToken = await tokenService.GetValidAccessTokenAsync();
+
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    Logger.Write("No se encontró token válido.", "Y", "Y", Logger.Mode.Info.ToString());
+                    return Unauthorized("No hay token válido.");
+                }
+
+                var mlClient = new MercadoLibreClient(accessToken);
+
+                var result = await mlClient.GetPublicationsAsync(userId);
+
+                Logger.Write("Publicaciones obtenidas desde Mercado Libre.", "Y", "Y", Logger.Mode.Info.ToString());
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Logger.Write($"Error al obtener publicaciones de ML: {ex.Message}", "Y", "Y", Logger.Mode.Error.ToString());
+                return BadRequest("Error al consultar publicaciones en ML.");
             }
         }
 
