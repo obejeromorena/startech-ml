@@ -113,34 +113,64 @@ namespace StartechML.Web.Controllers
 
         // GET: Obtiene publicaciones reales desde Mercado Libre
 
-        [HttpGet("ml/{userId}")]
-        public async Task<IActionResult> GetFromML(string userId)
+        [HttpGet("ml")]
+        public async Task<IActionResult> GetFromML()
         {
             try
             {
-                Logger.Write($"Consultando publicaciones en ML para usuario {userId}", "Y", "Y", Logger.Mode.Info.ToString());
+                Logger.Write("Consultando publicaciones en ML", "Y", "Y", Logger.Mode.Info.ToString());
 
                 var tokenService = new TokenService();
                 var accessToken = await tokenService.GetValidAccessTokenAsync();
 
                 if (string.IsNullOrEmpty(accessToken))
                 {
-                    Logger.Write("No se encontró token válido.", "Y", "Y", Logger.Mode.Info.ToString());
                     return Unauthorized("No hay token válido.");
                 }
 
                 var mlClient = new MercadoLibreClient(accessToken);
 
-                var result = await mlClient.GetPublicationsAsync(userId);
+                // 1️⃣ Obtener usuario del token
+                var userJson = await mlClient.GetMyUserAsync();
+                var userDoc = System.Text.Json.JsonDocument.Parse(userJson);
+                var userId = userDoc.RootElement.GetProperty("id").GetInt64();
 
-                Logger.Write("Publicaciones obtenidas desde Mercado Libre.", "Y", "Y", Logger.Mode.Info.ToString());
+                Logger.Write($"Usuario autenticado: {userId}", "Y", "Y", Logger.Mode.Info.ToString());
 
-                return Ok(result);
+                // 2️⃣ Obtener IDs de publicaciones
+                var result = await mlClient.GetPublicationsAsync(userId.ToString());
+
+                var doc = System.Text.Json.JsonDocument.Parse(result);
+                var ids = doc.RootElement.GetProperty("results");
+
+                var publications = new List<PublicationResponse>();
+
+                // 3️⃣ Obtener datos completos de cada publicación
+                foreach (var id in ids.EnumerateArray())
+                {
+                    var itemId = id.GetString();
+
+                    var itemJson = await mlClient.GetItemAsync(itemId!);
+                    var itemDoc = System.Text.Json.JsonDocument.Parse(itemJson);
+
+                    var root = itemDoc.RootElement;
+
+                    publications.Add(new PublicationResponse
+                    {
+                        Id = root.GetProperty("id").GetString() ?? string.Empty,
+                        Title = root.GetProperty("title").GetString() ?? string.Empty,
+                        Price = (decimal)root.GetProperty("price").GetDouble(),
+                        Status = root.GetProperty("status").GetString() ?? string.Empty,
+                        Permalink = root.GetProperty("permalink").GetString() ?? string.Empty
+                    });
+                }
+
+                return Ok(publications);
             }
             catch (Exception ex)
             {
-                Logger.Write($"Error al obtener publicaciones de ML: {ex.Message}", "Y", "Y", Logger.Mode.Error.ToString());
-                return BadRequest("Error al consultar publicaciones en ML.");
+                Logger.Write($"Error al obtener publicaciones: {ex.Message}", "Y", "Y", Logger.Mode.Error.ToString());
+                return BadRequest("Error al consultar publicaciones.");
             }
         }
 

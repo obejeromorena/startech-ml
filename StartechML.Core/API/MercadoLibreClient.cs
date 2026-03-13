@@ -40,7 +40,21 @@ namespace StartechML.Core.Api
             );
             Logger.Write("MercadoLibreClient inicializado correctamente", "Y", "Y", Logger.Mode.Info.ToString());
         }
+        //da el token
+        public async Task<string> GetMyUserAsync()
+        {
+            var response = await _httpClient.GetAsync("https://api.mercadolibre.com/users/me");
 
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Logger.Write($"Error obteniendo usuario: {body}", "Y", "Y", Logger.Mode.Error.ToString());
+                throw new HttpRequestException(body);
+            }
+
+            return body;
+        }
         // Crea una publicación en Mercado Libre
         public async Task<string> CreatePublicationAsync(PublicationRequest publication)
         {
@@ -190,6 +204,21 @@ namespace StartechML.Core.Api
             Logger.Write($"Publicación {itemId} cerrada correctamente", "Y", "Y", Logger.Mode.Info.ToString());
 
             return responseBody;
+        }
+
+        public async Task<string> GetItemAsync(string itemId)
+        {
+            var response = await _httpClient.GetAsync($"https://api.mercadolibre.com/items/{itemId}");
+
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Logger.Write($"Error obteniendo item {itemId}: {body}", "Y", "Y", Logger.Mode.Error.ToString());
+                throw new HttpRequestException(body);
+            }
+
+            return body;
         }
     }
 }
