@@ -134,4 +134,35 @@ export default function Publications() {
 
         </div>
     )
+
+    async function handleSubmit(e) {
+    e.preventDefault()
+
+    try {
+
+        const res = await fetch("https://localhost:7006/api/publications", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formData)
+        })
+
+        if (!res.ok) {
+            const text = await res.text()
+            throw new Error(text)
+        }
+
+        const data = await res.json()
+
+        alert("Publicación creada correctamente")
+
+    } catch (error) {
+
+        console.error(error)
+
+        alert(error.message)
+
+    }
+    }
 }

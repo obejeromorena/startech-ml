@@ -10,93 +10,113 @@ export default function CreatePublication() {
 
     async function handleSubmit(e) {
 
-    e.preventDefault()
+        e.preventDefault()
 
-    const data = {
+        if (!title || !price || !category || !image) {
+            alert("Completa todos los campos")
+            return
+        }
 
-        title: title,
-        price: parseFloat(price),
-        category_id: category,
-        available_quantity: 1,
-        buying_mode: "buy_it_now",
-        listing_type_id: "gold_special",
-        condition: "new",
-        currency_id: "ARS",
+        if (isNaN(price)) {
+            alert("El precio debe ser un número")
+            return
+        }
 
-        pictures: [
-        { source: image }
-        ]
+        const data = {
 
-    }
+            title: title,
+            price: parseFloat(price),
+            category_id: category,
+            available_quantity: 1,
+            buying_mode: "buy_it_now",
+            listing_type_id: "gold_special",
+            condition: "new",
+            currency_id: "ARS",
 
-    try {
+            pictures: [
+                { source: image }
+            ],
 
-        await createPublication(data)
+            attributes: [
+                {
+                    id: "BRAND",
+                    value_name: "Logitech"
+                },
+                {
+                    id: "MODEL",
+                    value_name: "G203"
+                }
+            ]
+        }
 
-        alert("Publicación creada correctamente")
+        try {
 
-        setTitle("")
-        setPrice("")
-        setCategory("")
-        setImage("")
+            await createPublication(data)
 
-    } catch (error) {
+            alert("Publicación creada correctamente")
 
-        console.error(error)
-        alert("Error al crear publicación")
+            setTitle("")
+            setPrice("")
+            setCategory("")
+            setImage("")
 
-    }
+        } catch (error) {
+
+            console.error(error)
+            alert("Error al crear publicación")
+
+        }
 
     }
 
     return (
 
-    <div>
-
-        <h1>Crear publicación</h1>
-
-        <form onSubmit={handleSubmit}>
-
         <div>
-            <label>Titulo</label>
-            <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            />
+
+            <h1>Crear publicación</h1>
+
+            <form onSubmit={handleSubmit}>
+
+                <div>
+                    <label>Titulo</label>
+                    <input
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                    />
+                </div>
+
+                <div>
+                    <label>Precio</label>
+                    <input
+                        type="number"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                    />
+                </div>
+
+                <div>
+                    <label>Categoria</label>
+                    <input
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        placeholder="MLA3530"
+                    />
+                </div>
+
+                <div>
+                    <label>Imagen URL</label>
+                    <input
+                        value={image}
+                        onChange={(e) => setImage(e.target.value)}
+                    />
+                </div>
+
+                <button type="submit">
+                    Crear publicación
+                </button>
+
+            </form>
+
         </div>
-
-        <div>
-            <label>Precio</label>
-            <input
-            type="number"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            />
-        </div>
-
-        <div>
-            <label>Categoria</label>
-            <input
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="MLA3530"
-            />
-        </div>
-
-        <div>
-            <label>Imagen URL</label>
-            <input
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
-            />
-        </div>
-
-        <button type="submit">
-            Crear publicación
-        </button>
-
-        </form>
-
-    </div>
     )
 }

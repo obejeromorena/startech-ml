@@ -88,9 +88,8 @@ namespace StartechML.Web.Controllers
             }
             catch (Exception ex)
             {
-                // Captura cualquier error inesperado
-                Logger.Write("Error al publicar en Mercado Libre: {ex.Message}", "Y", "Y", Logger.Mode.Info.ToString());
-                return BadRequest("Ocurrió un error al publicar.");
+                Logger.Write($"Error al publicar en Mercado Libre: {ex.Message}", "Y", "Y", Logger.Mode.Error.ToString());
+                return BadRequest(ex.Message);
             }
         }
 
