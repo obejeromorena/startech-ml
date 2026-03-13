@@ -174,10 +174,10 @@ namespace StartechML.Web.Controllers
             }
         }
 
-        // PUT: Modifica una publicación en ML
+        // PUT: Modifica el precio de una publicación en ML
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] object updateData)
+        public async Task<IActionResult> Update(string id, [FromBody] UpdatePriceRequest request)
         {
             try
             {
@@ -194,7 +194,10 @@ namespace StartechML.Web.Controllers
 
                 var mlClient = new MercadoLibreClient(accessToken);
 
-                var result = await mlClient.UpdatePublicationAsync(id, updateData);
+                var result = await mlClient.UpdatePublicationAsync(id, new
+                {
+                    price = request.Price
+                });
 
                 Logger.Write($"Publicación {id} actualizada correctamente.", "Y", "Y", Logger.Mode.Info.ToString());
 

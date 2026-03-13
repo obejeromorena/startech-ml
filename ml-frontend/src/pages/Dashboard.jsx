@@ -1,4 +1,9 @@
     import { useNavigate } from "react-router-dom";
+    import { Link } from "react-router-dom"
+
+    <Link to="/create">
+    Crear publicación
+    </Link>
 
     export default function Dashboard() {
 

@@ -1,46 +1,137 @@
-    import { useEffect, useState } from "react";
-    import { getPublications, deletePublication } from "../services/Api";
-    import PublicationTable from "../components/PublicationTable";
+import { useEffect, useState } from "react"
+import { getPublications, deletePublication } from "../services/Api"
 
-    export default function Publications() {
+export default function Publications() {
 
-    const [publications, setPublications] = useState([]);
+    const [publications, setPublications] = useState([])
 
-    const userId = "2804901742283043";
+    async function loadPublications() {
+        try {
+            const data = await getPublications()
+            setPublications(data)
+        } catch (error) {
+            console.error(error)
+            alert("Error al cargar publicaciones")
+        }
+    }
 
     useEffect(() => {
-        loadPublications();
-    }, []);
+        loadPublications()
+    }, [])
 
+    async function handleDelete(id) {
 
-    const loadPublications = async () => {
-    const data = await getPublications();
+        if (!confirm("¿Seguro que querés cerrar la publicación?"))
+            return
 
-    setPublications(data);
-};
+        try {
 
-    const handleDelete = async (id) => {
+            await deletePublication(id)
 
-        await deletePublication(id);
+            alert("Publicación cerrada correctamente")
 
-        loadPublications();
-    };
+            await loadPublications()
 
-    const handleEdit = (publication) => {
-        console.log("Editar", publication);
-    };
+        } catch (error) {
+
+            console.error(error)
+
+            alert("Error al cerrar la publicación")
+
+        }
+    }
+
+    async function handleEdit(id) {
+
+        const newPrice = prompt("Nuevo precio:")
+
+        // validar precio
+        if (!newPrice || isNaN(newPrice)) {
+            alert("Precio inválido")
+            return
+        }
+
+        try {
+
+            const res = await fetch(`https://localhost:7006/api/publications/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    price: parseFloat(newPrice)
+                })
+            })
+
+            if (!res.ok) {
+                throw new Error("Error al actualizar precio")
+            }
+
+            alert("Precio actualizado correctamente")
+
+            await loadPublications()
+
+        } catch (error) {
+
+            console.error(error)
+
+            alert("Error al actualizar la publicación")
+
+        }
+    }
 
     return (
         <div>
 
-        <h2>Publicaciones</h2>
+            <h1>Publicaciones</h1>
 
-        <PublicationTable
-            publications={publications}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
-        />
+            <table border="1">
+
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Titulo</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {publications.map(pub => (
+
+                        <tr key={pub.id}>
+
+                            <td>{pub.id}</td>
+                            <td>{pub.title}</td>
+                            <td>{pub.price}</td>
+                            <td>{pub.status}</td>
+
+                            <td>
+
+                                <button onClick={() => handleEdit(pub.id)}>
+                                    Editar
+                                </button>
+
+                                <button onClick={() => handleDelete(pub.id)}>
+                                    Eliminar
+                                </button>
+
+                                <a href={pub.permalink} target="_blank" rel="noreferrer">
+                                    Ver en ML
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    ))}
+
+                </tbody>
+
+            </table>
 
         </div>
-    );
-    }
+    )
+}
