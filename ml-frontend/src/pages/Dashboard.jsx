@@ -1,4 +1,5 @@
     import { useNavigate } from "react-router-dom";
+    import logo from "../assets/logo.png";
 
     export default function Dashboard() {
     const navigate = useNavigate();
@@ -15,17 +16,23 @@
         justifyContent: "flex-start",
         fontFamily: "Arial, sans-serif",
         },
+
+        // ✅ HEADER CORREGIDO
         header: {
         padding: "30px",
-        fontSize: "40px",
-        color: "#3b82f6",
+        display: "flex",
+        alignItems: "center",
+        gap: "15px",
+        cursor: "pointer",
         },
+
         content: {
         flex: 1,
         display: "flex",
         gap: "20px",
         padding: "30px",
         },
+
         card: {
         flex: 1,
         backgroundColor: "#111827",
@@ -38,6 +45,7 @@
         justifyContent: "center",
         alignItems: "center",
         },
+
         buttonPrimary: {
         backgroundColor: "#2563eb",
         border: "none",
@@ -48,6 +56,7 @@
         fontWeight: "bold",
         fontSize: "16px",
         },
+
         buttonSecondary: {
         backgroundColor: "transparent",
         border: "1px solid #3b82f6",
@@ -58,6 +67,7 @@
         fontWeight: "bold",
         fontSize: "16px",
         },
+
         footer: {
         textAlign: "center",
         padding: "15px",
@@ -69,7 +79,27 @@
 
     return (
         <div style={styles.container}>
-        <div style={styles.header}>Startechnology</div>
+        
+        {/* ✅ HEADER COMPLETO */}
+        <div style={styles.header} onClick={() => navigate("/")}>
+            <img
+            src={logo}
+            alt="Startechnology logo"
+            style={{ height: "60px" }}
+            />
+
+            <span
+            style={{
+                fontSize: "40px",
+                color: "#3b82f6",
+                fontWeight: "bold",
+                letterSpacing: "1px",
+                textShadow: "0 0 10px rgba(59,130,246,0.7)", // opcional pro
+            }}
+            >
+            Startechnology
+            </span>
+        </div>
 
         <div style={styles.content}>
             <div style={styles.card}>
