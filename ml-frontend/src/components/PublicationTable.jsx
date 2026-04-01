@@ -91,10 +91,10 @@ export default function PublicationTable({ publications, onDelete, onEdit }) {
 
                             <td style={styles.td}>
                                 <div style={styles.actions}>
-                                    {/* ✅ ARREGLADO: ahora manda solo el ID */}
+                                    
                                     <button
                                         style={styles.btnEdit}
-                                        onClick={() => onEdit(p.id)}
+                                        onClick={() => onEdit(p)}
                                     >
                                         Editar
                                     </button>

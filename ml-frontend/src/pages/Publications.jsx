@@ -6,6 +6,10 @@ export default function Publications() {
 
     const [publications, setPublications] = useState([])
 
+    const [editingPub, setEditingPub] = useState(null)
+    const [newPrice, setNewPrice] = useState("")
+    const [newTitle, setNewTitle] = useState("")
+
     async function loadPublications() {
         try {
             const data = await getPublications()
@@ -42,18 +46,28 @@ export default function Publications() {
         }
     }
 
-    async function handleEdit(id) {
+    function handleEdit(pub) {
+        console.log("EDITANDO:", pub) 
 
-        const newPrice = prompt("Nuevo precio:")
+        setEditingPub(pub)
+        setNewPrice(pub.price)
+        setNewTitle(pub.title)
+    }
+
+    async function handleUpdate() {
 
         if (!newPrice || isNaN(newPrice)) {
             alert("Precio inválido")
             return
         }
 
-        try {
+        if (!newTitle) {
+            alert("El título no puede estar vacío")
+            return
+        }
 
-            const res = await fetch(`https://localhost:7006/api/publications/${id}`, {
+            try {
+            const res = await fetch(`https://localhost:7006/api/publications/${editingPub.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
@@ -63,31 +77,66 @@ export default function Publications() {
                 })
             })
 
+            const data = await res.json()
+
+            console.log("RESPUESTA UPDATE:", data) // 👈 ACÁ VA
+
             if (!res.ok) {
-                throw new Error("Error al actualizar precio")
+                throw new Error("Error al actualizar")
             }
 
-            alert("Precio actualizado correctamente")
+            alert("Actualizado correctamente")
 
-            await loadPublications()
+            setEditingPub(null)
+            loadPublications()
 
         } catch (error) {
-
             console.error(error)
-
             alert("Error al actualizar la publicación")
-
         }
     }
 
-    // ❌ ELIMINAMOS handleSubmit de abajo (no se usaba y estaba mal ubicado)
-
-    // ✅ USAMOS EL COMPONENTE NUEVO
     return (
-        <PublicationTable
-            publications={publications}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
-        />
+        <div>
+
+            <PublicationTable
+                publications={publications}
+                onDelete={handleDelete}
+                onEdit={handleEdit} // 👈 importante: ahora recibe el objeto completo
+            />
+
+            {/* 🆕 FORMULARIO */}
+            {editingPub && (
+                <div style={{ marginTop: "20px", border: "1px solid black", padding: "10px" }}>
+                    <h2>Editar publicación</h2>
+
+                    <div>
+                        <label>Título</label>
+                        <input
+                            value={newTitle}
+                            onChange={(e) => setNewTitle(e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <label>Precio</label>
+                        <input
+                            type="number"
+                            value={newPrice}
+                            onChange={(e) => setNewPrice(e.target.value)}
+                        />
+                    </div>
+
+                    <button onClick={handleUpdate}>
+                        Guardar cambios
+                    </button>
+
+                    <button onClick={() => setEditingPub(null)}>
+                        Cancelar
+                    </button>
+                </div>
+            )}
+
+        </div>
     )
 }
